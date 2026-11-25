@@ -248,7 +248,7 @@ export default function App() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                 {/* COL 1: Basic Info & Metrics */}
-                <div className="space-y-4">
+                <div className="space-y-4 min-w-0">
                   <h3 className="font-semibold text-gray-700 border-b pb-2">Basic Info</h3>
                   <div>
                     <label className="block text-sm text-gray-600 mb-1">Date</label>
@@ -270,24 +270,57 @@ export default function App() {
 
                   <h3 className="font-semibold text-gray-700 border-b pb-2 mt-4 pt-4">Last Week Metrics</h3>
 
-                  <div className="flex justify-between items-center bg-gray-50 p-2 rounded border">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl">😊</span>
-                      <button onClick={() => setSheetData({ ...sheetData, happyCount: Math.max(0, sheetData.happyCount - 1) })} className="bg-gray-200 px-2 rounded hover:bg-gray-300">-</button>
-                      <span className="w-5 text-center font-medium">{sheetData.happyCount}</span>
-                      <button onClick={() => setSheetData({ ...sheetData, happyCount: sheetData.happyCount + 1 })} className="bg-gray-200 px-2 rounded hover:bg-gray-300">+</button>
+                  {/* Smileys compactos em grade de 3 colunas para nunca invadir o campo ao lado */}
+                  <div className="grid grid-cols-3 gap-1.5 bg-gray-50 p-1.5 rounded border">
+                    <div className="flex flex-col items-center gap-1 bg-white p-1.5 rounded border border-gray-200 min-w-0">
+                      <span className="text-base leading-none">😊</span>
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setSheetData({ ...sheetData, happyCount: Math.max(0, sheetData.happyCount - 1) })}
+                          className="w-5 h-5 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 text-xs font-bold leading-none"
+                        >-</button>
+                        <span className="w-5 text-center text-xs font-semibold">{sheetData.happyCount}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSheetData({ ...sheetData, happyCount: sheetData.happyCount + 1 })}
+                          className="w-5 h-5 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 text-xs font-bold leading-none"
+                        >+</button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl">😕</span>
-                      <button onClick={() => setSheetData({ ...sheetData, neutralCount: Math.max(0, sheetData.neutralCount - 1) })} className="bg-gray-200 px-2 rounded hover:bg-gray-300">-</button>
-                      <span className="w-5 text-center font-medium">{sheetData.neutralCount}</span>
-                      <button onClick={() => setSheetData({ ...sheetData, neutralCount: sheetData.neutralCount + 1 })} className="bg-gray-200 px-2 rounded hover:bg-gray-300">+</button>
+
+                    <div className="flex flex-col items-center gap-1 bg-white p-1.5 rounded border border-gray-200 min-w-0">
+                      <span className="text-base leading-none">😕</span>
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setSheetData({ ...sheetData, neutralCount: Math.max(0, sheetData.neutralCount - 1) })}
+                          className="w-5 h-5 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 text-xs font-bold leading-none"
+                        >-</button>
+                        <span className="w-5 text-center text-xs font-semibold">{sheetData.neutralCount}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSheetData({ ...sheetData, neutralCount: sheetData.neutralCount + 1 })}
+                          className="w-5 h-5 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 text-xs font-bold leading-none"
+                        >+</button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xl">😞</span>
-                      <button onClick={() => setSheetData({ ...sheetData, sadCount: Math.max(0, sheetData.sadCount - 1) })} className="bg-gray-200 px-2 rounded hover:bg-gray-300">-</button>
-                      <span className="w-5 text-center font-medium">{sheetData.sadCount}</span>
-                      <button onClick={() => setSheetData({ ...sheetData, sadCount: sheetData.sadCount + 1 })} className="bg-gray-200 px-2 rounded hover:bg-gray-300">+</button>
+
+                    <div className="flex flex-col items-center gap-1 bg-white p-1.5 rounded border border-gray-200 min-w-0">
+                      <span className="text-base leading-none">😞</span>
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setSheetData({ ...sheetData, sadCount: Math.max(0, sheetData.sadCount - 1) })}
+                          className="w-5 h-5 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 text-xs font-bold leading-none"
+                        >-</button>
+                        <span className="w-5 text-center text-xs font-semibold">{sheetData.sadCount}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSheetData({ ...sheetData, sadCount: sheetData.sadCount + 1 })}
+                          className="w-5 h-5 flex items-center justify-center bg-gray-200 rounded hover:bg-gray-300 text-xs font-bold leading-none"
+                        >+</button>
+                      </div>
                     </div>
                   </div>
 
@@ -314,7 +347,7 @@ export default function App() {
                 </div>
 
                 {/* COL 2: Managers */}
-                <div className="space-y-4">
+                <div className="space-y-4 min-w-0">
                   <h3 className="font-semibold text-gray-700 border-b pb-2">Managers (Select up to 2)</h3>
 
                   <div className="bg-gray-50 p-3 rounded border">
@@ -361,7 +394,7 @@ export default function App() {
                 </div>
 
                 {/* COL 3: Add Shift */}
-                <div className="space-y-4">
+                <div className="space-y-4 min-w-0">
                   <h3 className="font-semibold text-gray-700 border-b pb-2">Add Shift</h3>
                   <ShiftAdder
                     employees={employees}
@@ -376,7 +409,7 @@ export default function App() {
                     }}
                   />
                   <p className="text-xs text-gray-500">
-                    💡 Dica: Na folha abaixo, clique e arraste o nome de qualquer funcionário para mudar a ordem (FOH só move entre FOH e BOH só move entre BOH).
+                    💡 Tip: In the sheet below, click and drag any employee's name to reorder (FOH only moves within FOH, and BOH only moves within BOH).
                   </p>
                 </div>
               </div>

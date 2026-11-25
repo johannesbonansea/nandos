@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // ==========================================
-// DEFAULT DATA2
+// DEFAULT DATA
 // ==========================================
 const defaultRoles = [
   { id: 1, name: 'CS', isBOH: false },
@@ -195,7 +195,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <span className="text-xl">📋</span>
-            <span className="text-xl font-bold tracking-tight">ShiftMaster Pro</span>
+            <span className="text-xl font-bold tracking-tight">David, the best manager</span>
           </div>
           <div className="flex space-x-4">
             <button

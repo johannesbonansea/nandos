@@ -298,7 +298,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
           <div className="flex items-center space-x-3">
             <span className="text-xl">📋</span>
-            <span className="text-xl font-bold tracking-tight">ShiftMaster Pro</span>
+            <span className="text-xl font-bold tracking-tight">David, the best manager</span>
             <button
               type="button"
               onClick={loadFromCloud}

@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from 'react';
 
 // ==========================================
+// CLOUD DATABASE CONFIG (FIREBASE)
+// ==========================================
+const DATABASE_URL = 'https://nandos-sheet-default-rtdb.europe-west1.firebasedatabase.app/';
+const CLEAN_DB_URL = DATABASE_URL.trim().replace(/\/+$/, '');
+const IS_CLOUD_ENABLED = CLEAN_DB_URL.startsWith('https://');
+
+// Garante que os dados vindos do Firebase sempre funcionem como lista
+const toArray = (val, fallback) => {
+  if (!val) return fallback;
+  if (Array.isArray(val)) return val.filter(item => item !== null && item !== undefined);
+  if (typeof val === 'object') return Object.values(val).filter(item => item !== null && item !== undefined);
+  return fallback;
+};
+
+// ==========================================
 // DEFAULT DATA
 // ==========================================
 const defaultRoles = [
@@ -95,7 +110,6 @@ const parseBreakTotalMins = (text) => {
 };
 
 // Insere novo turno na ordem de horário dentro do seu grupo (FOH ou BOH)
-// sem desmanchar eventuais reordenações manuais já feitas
 const insertShiftOrdered = (currentShifts, newShift) => {
   const group = currentShifts.filter(s => s.isBOH === newShift.isBOH);
   const otherGroup = currentShifts.filter(s => s.isBOH !== newShift.isBOH);
@@ -120,6 +134,7 @@ const insertShiftOrdered = (currentShifts, newShift) => {
 // ==========================================
 export default function App() {
   const [activeTab, setActiveTab] = useState('sheet');
+  const [syncStatus, setSyncStatus] = useState(IS_CLOUD_ENABLED ? 'loading' : 'local');
 
   const [roles, setRoles] = useState(() => JSON.parse(localStorage.getItem('roles')) || defaultRoles);
   const [employees, setEmployees] = useState(() => JSON.parse(localStorage.getItem('employees')) || defaultEmployees);
@@ -127,11 +142,89 @@ export default function App() {
   const [tasks, setTasks] = useState(() => JSON.parse(localStorage.getItem('tasks')) || defaultTasks);
   const [closedownJobs, setClosedownJobs] = useState(() => JSON.parse(localStorage.getItem('closedownJobs')) || defaultClosedownJobs);
 
-  useEffect(() => localStorage.setItem('roles', JSON.stringify(roles)), [roles]);
-  useEffect(() => localStorage.setItem('employees', JSON.stringify(employees)), [employees]);
-  useEffect(() => localStorage.setItem('breakRules_v2', JSON.stringify(breakRules)), [breakRules]);
-  useEffect(() => localStorage.setItem('tasks', JSON.stringify(tasks)), [tasks]);
-  useEffect(() => localStorage.setItem('closedownJobs', JSON.stringify(closedownJobs)), [closedownJobs]);
+  // Carrega dados do Firebase ao abrir o site
+  const loadFromCloud = async () => {
+    if (!IS_CLOUD_ENABLED) return;
+    try {
+      setSyncStatus('loading');
+      const res = await fetch(`${CLEAN_DB_URL}/config.json`);
+      if (!res.ok) throw new Error('Failed to load from Firebase');
+      const data = await res.json();
+
+      if (!data) {
+        // Primeira vez com o banco vazio: sobe os dados atuais automaticamente
+        const initialPayload = {
+          roles,
+          employees,
+          breakRules,
+          tasks,
+          closedownJobs,
+        };
+        const seedRes = await fetch(`${CLEAN_DB_URL}/config.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(initialPayload),
+        });
+        if (!seedRes.ok) throw new Error('Failed to seed Firebase');
+        setSyncStatus('synced');
+        return;
+      }
+
+      const loadedRoles = toArray(data.roles, defaultRoles);
+      const loadedEmployees = toArray(data.employees, defaultEmployees);
+      const loadedBreakRules = toArray(data.breakRules, defaultBreakRules);
+      const loadedTasks = toArray(data.tasks, defaultTasks);
+      const loadedClosedownJobs = toArray(data.closedownJobs, defaultClosedownJobs);
+
+      setRoles(loadedRoles);
+      setEmployees(loadedEmployees);
+      setBreakRules(loadedBreakRules);
+      setTasks(loadedTasks);
+      setClosedownJobs(loadedClosedownJobs);
+
+      localStorage.setItem('roles', JSON.stringify(loadedRoles));
+      localStorage.setItem('employees', JSON.stringify(loadedEmployees));
+      localStorage.setItem('breakRules_v2', JSON.stringify(loadedBreakRules));
+      localStorage.setItem('tasks', JSON.stringify(loadedTasks));
+      localStorage.setItem('closedownJobs', JSON.stringify(loadedClosedownJobs));
+
+      setSyncStatus('synced');
+    } catch (err) {
+      console.error('Cloud load error:', err);
+      setSyncStatus('error');
+    }
+  };
+
+  useEffect(() => {
+    loadFromCloud();
+  }, []);
+
+  // Salva cada seção alterada no Firebase e no localStorage
+  const saveSectionToCloud = async (sectionKey, newValue) => {
+    const storageKey = sectionKey === 'breakRules' ? 'breakRules_v2' : sectionKey;
+    localStorage.setItem(storageKey, JSON.stringify(newValue));
+
+    if (!IS_CLOUD_ENABLED) return;
+    try {
+      setSyncStatus('saving');
+      const res = await fetch(`${CLEAN_DB_URL}/config/${sectionKey}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newValue),
+      });
+      if (!res.ok) throw new Error('Save failed');
+      setSyncStatus('synced');
+    } catch (err) {
+      console.error(`Cloud save error (${sectionKey}):`, err);
+      setSyncStatus('error');
+    }
+  };
+
+  const updateRoles = (next) => { setRoles(next); saveSectionToCloud('roles', next); };
+  const updateEmployees = (next) => { setEmployees(next); saveSectionToCloud('employees', next); };
+  const updateBreakRules = (next) => { setBreakRules(next); saveSectionToCloud('breakRules', next); };
+  const updateTasks = (next) => { setTasks(next); saveSectionToCloud('tasks', next); };
+  const updateClosedownJobs = (next) => { setClosedownJobs(next); saveSectionToCloud('closedownJobs', next); };
 
   const [sheetData, setSheetData] = useState(initialSheetState);
 
@@ -173,6 +266,14 @@ export default function App() {
 
   const managerList = employees.filter(e => e.role.toLowerCase().includes('manager'));
 
+  const syncBadge = {
+    loading: { text: '⏳ Loading...', cls: 'bg-slate-700 text-slate-200' },
+    saving: { text: '☁️ Saving...', cls: 'bg-amber-600 text-white' },
+    synced: { text: '☁️ Synced', cls: 'bg-emerald-700 text-white' },
+    error: { text: '⚠️ Sync Error', cls: 'bg-red-600 text-white' },
+    local: { text: '💾 Local Only', cls: 'bg-slate-700 text-slate-300' },
+  }[syncStatus];
+
   return (
     <div className="min-h-screen bg-gray-100 font-sans print:bg-white print:m-0 print:p-0">
       <style>{`
@@ -194,10 +295,18 @@ export default function App() {
       `}</style>
 
       <nav className="bg-slate-800 text-white p-4 shadow-md noprint">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
+          <div className="flex items-center space-x-3">
             <span className="text-xl">📋</span>
-            <span className="text-xl font-bold tracking-tight">David, the best manager</span>
+            <span className="text-xl font-bold tracking-tight">ShiftMaster Pro</span>
+            <button
+              type="button"
+              onClick={loadFromCloud}
+              title="Click to reload from cloud database"
+              className={`text-xs px-2.5 py-1 rounded-full font-medium transition-opacity hover:opacity-85 ${syncBadge.cls}`}
+            >
+              {syncBadge.text}
+            </button>
           </div>
           <div className="flex space-x-4">
             <button
@@ -219,11 +328,11 @@ export default function App() {
       <main className="pb-12 print:pb-0">
         {activeTab === 'management' && (
           <ManagementTab
-            roles={roles} setRoles={setRoles}
-            employees={employees} setEmployees={setEmployees}
-            breakRules={breakRules} setBreakRules={setBreakRules}
-            tasks={tasks} setTasks={setTasks}
-            closedownJobs={closedownJobs} setClosedownJobs={setClosedownJobs}
+            roles={roles} setRoles={updateRoles}
+            employees={employees} setEmployees={updateEmployees}
+            breakRules={breakRules} setBreakRules={updateBreakRules}
+            tasks={tasks} setTasks={updateTasks}
+            closedownJobs={closedownJobs} setClosedownJobs={updateClosedownJobs}
           />
         )}
 

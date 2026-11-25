@@ -136,7 +136,7 @@ export default function App() {
   const [sheetData, setSheetData] = useState(initialSheetState);
 
   const clearForm = () => {
-    if (window.confirm("Tem certeza que deseja apagar os turnos e limpar este formulário?")) {
+    if (window.confirm("Are you sure you want to delete the shifts and clear this form?")) {
       setSheetData({
         ...initialSheetState,
         date: new Date().toISOString().split('T')[0],

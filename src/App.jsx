@@ -73,9 +73,9 @@ const initialSheetState = {
   date: new Date().toISOString().split('T')[0],
   forecastToday: '',
   forecastTomorrow: '',
-  amManagerId1: '', amManagerId2: '',
-  splitManagerId1: '', splitManagerId2: '',
-  pmManagerId1: '', pmManagerId2: '',
+  amManagerId1: '', amManagerId2: '', amManagerId3: '',
+  splitManagerId1: '', splitManagerId2: '', splitManagerId3: '',
+  pmManagerId1: '', pmManagerId2: '', pmManagerId3: '',
   amShifts: [],
   pmShifts: [],
   happyCount: 0,
@@ -170,6 +170,8 @@ export default function App() {
   const handlePrint = () => {
     window.print();
   };
+
+  const managerList = employees.filter(e => e.role.toLowerCase().includes('manager'));
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans print:bg-white print:m-0 print:p-0">
@@ -270,7 +272,6 @@ export default function App() {
 
                   <h3 className="font-semibold text-gray-700 border-b pb-2 mt-4 pt-4">Last Week Metrics</h3>
 
-                  {/* Smileys compactos em grade de 3 colunas para nunca invadir o campo ao lado */}
                   <div className="grid grid-cols-3 gap-1.5 bg-gray-50 p-1.5 rounded border">
                     <div className="flex flex-col items-center gap-1 bg-white p-1.5 rounded border border-gray-200 min-w-0">
                       <span className="text-base leading-none">😊</span>
@@ -346,48 +347,60 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* COL 2: Managers */}
-                <div className="space-y-4 min-w-0">
-                  <h3 className="font-semibold text-gray-700 border-b pb-2">Managers (Select up to 2)</h3>
+                {/* COL 2: Managers (Select up to 3) */}
+                <div className="space-y-3 min-w-0">
+                  <h3 className="font-semibold text-gray-700 border-b pb-2">Managers (Select up to 3)</h3>
 
-                  <div className="bg-gray-50 p-3 rounded border">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">AM Manager(s)</label>
-                    <div className="space-y-2">
-                      <select className="w-full p-2 border rounded-md bg-white text-sm" value={sheetData.amManagerId1} onChange={e => setSheetData({ ...sheetData, amManagerId1: e.target.value })}>
+                  <div className="bg-gray-50 p-2.5 rounded border">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">AM Manager(s)</label>
+                    <div className="space-y-1.5">
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.amManagerId1} onChange={e => setSheetData({ ...sheetData, amManagerId1: e.target.value })}>
                         <option value="">Manager 1...</option>
-                        {employees.filter(e => e.role.toLowerCase().includes('manager')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                       </select>
-                      <select className="w-full p-2 border rounded-md bg-white text-sm" value={sheetData.amManagerId2} onChange={e => setSheetData({ ...sheetData, amManagerId2: e.target.value })}>
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.amManagerId2} onChange={e => setSheetData({ ...sheetData, amManagerId2: e.target.value })}>
                         <option value="">Manager 2 (Optional)...</option>
-                        {employees.filter(e => e.role.toLowerCase().includes('manager')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                      </select>
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.amManagerId3} onChange={e => setSheetData({ ...sheetData, amManagerId3: e.target.value })}>
+                        <option value="">Manager 3 (Optional)...</option>
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                       </select>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 p-3 rounded border">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Split Manager(s)</label>
-                    <div className="space-y-2">
-                      <select className="w-full p-2 border rounded-md bg-white text-sm" value={sheetData.splitManagerId1} onChange={e => setSheetData({ ...sheetData, splitManagerId1: e.target.value })}>
+                  <div className="bg-gray-50 p-2.5 rounded border">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Split Manager(s)</label>
+                    <div className="space-y-1.5">
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.splitManagerId1} onChange={e => setSheetData({ ...sheetData, splitManagerId1: e.target.value })}>
                         <option value="">Manager 1...</option>
-                        {employees.filter(e => e.role.toLowerCase().includes('manager')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                       </select>
-                      <select className="w-full p-2 border rounded-md bg-white text-sm" value={sheetData.splitManagerId2} onChange={e => setSheetData({ ...sheetData, splitManagerId2: e.target.value })}>
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.splitManagerId2} onChange={e => setSheetData({ ...sheetData, splitManagerId2: e.target.value })}>
                         <option value="">Manager 2 (Optional)...</option>
-                        {employees.filter(e => e.role.toLowerCase().includes('manager')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                      </select>
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.splitManagerId3} onChange={e => setSheetData({ ...sheetData, splitManagerId3: e.target.value })}>
+                        <option value="">Manager 3 (Optional)...</option>
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                       </select>
                     </div>
                   </div>
 
-                  <div className="bg-gray-50 p-3 rounded border">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">PM Manager(s)</label>
-                    <div className="space-y-2">
-                      <select className="w-full p-2 border rounded-md bg-white text-sm" value={sheetData.pmManagerId1} onChange={e => setSheetData({ ...sheetData, pmManagerId1: e.target.value })}>
+                  <div className="bg-gray-50 p-2.5 rounded border">
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">PM Manager(s)</label>
+                    <div className="space-y-1.5">
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.pmManagerId1} onChange={e => setSheetData({ ...sheetData, pmManagerId1: e.target.value })}>
                         <option value="">Manager 1...</option>
-                        {employees.filter(e => e.role.toLowerCase().includes('manager')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                       </select>
-                      <select className="w-full p-2 border rounded-md bg-white text-sm" value={sheetData.pmManagerId2} onChange={e => setSheetData({ ...sheetData, pmManagerId2: e.target.value })}>
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.pmManagerId2} onChange={e => setSheetData({ ...sheetData, pmManagerId2: e.target.value })}>
                         <option value="">Manager 2 (Optional)...</option>
-                        {employees.filter(e => e.role.toLowerCase().includes('manager')).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
+                      </select>
+                      <select className="w-full p-1.5 border rounded-md bg-white text-sm" value={sheetData.pmManagerId3} onChange={e => setSheetData({ ...sheetData, pmManagerId3: e.target.value })}>
+                        <option value="">Manager 3 (Optional)...</option>
+                        {managerList.map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
                       </select>
                     </div>
                   </div>
@@ -777,13 +790,11 @@ function SheetPreview({ data, employees, tasks, closedownJobs, setData }) {
   const [draggedItem, setDraggedItem] = useState(null);
   const [dragOverId, setDragOverId] = useState(null);
 
-  const formatManagers = (id1, id2) => {
-    const m1 = employees.find(e => e.id.toString() === id1?.toString())?.name;
-    const m2 = employees.find(e => e.id.toString() === id2?.toString())?.name;
-    if (m1 && m2) return `${m1} / ${m2}`;
-    if (m1) return m1;
-    if (m2) return m2;
-    return '';
+  const formatManagers = (...ids) => {
+    return ids
+      .map(id => employees.find(e => e.id.toString() === id?.toString())?.name)
+      .filter(Boolean)
+      .join(' / ');
   };
 
   const formatDate = (dateString) => {
@@ -967,20 +978,20 @@ function SheetPreview({ data, employees, tasks, closedownJobs, setData }) {
       <div className="grid grid-cols-4 border-b-[2px] border-gray-800 text-center bg-gray-200 divide-x-[2px] divide-gray-800">
         <div className="py-0.5 flex flex-col items-center justify-center h-9">
           <span className="text-[10px] uppercase font-semibold">AM Manager</span>
-          <span className="text-[11px] bg-white w-full border-t border-gray-400 font-bold h-full flex items-center justify-center truncate px-1">
-            {formatManagers(data.amManagerId1, data.amManagerId2)}
+          <span className="text-[10px] bg-white w-full border-t border-gray-400 font-bold h-full flex items-center justify-center truncate px-1">
+            {formatManagers(data.amManagerId1, data.amManagerId2, data.amManagerId3)}
           </span>
         </div>
         <div className="py-0.5 flex flex-col items-center justify-center h-9">
           <span className="text-[10px] uppercase font-semibold">Split Manager</span>
-          <span className="text-[11px] bg-white w-full border-t border-gray-400 font-bold h-full flex items-center justify-center truncate px-1">
-            {formatManagers(data.splitManagerId1, data.splitManagerId2)}
+          <span className="text-[10px] bg-white w-full border-t border-gray-400 font-bold h-full flex items-center justify-center truncate px-1">
+            {formatManagers(data.splitManagerId1, data.splitManagerId2, data.splitManagerId3)}
           </span>
         </div>
         <div className="py-0.5 flex flex-col items-center justify-center h-9">
           <span className="text-[10px] uppercase font-semibold">PM Manager</span>
-          <span className="text-[11px] bg-white w-full border-t border-gray-400 font-bold h-full flex items-center justify-center truncate px-1">
-            {formatManagers(data.pmManagerId1, data.pmManagerId2)}
+          <span className="text-[10px] bg-white w-full border-t border-gray-400 font-bold h-full flex items-center justify-center truncate px-1">
+            {formatManagers(data.pmManagerId1, data.pmManagerId2, data.pmManagerId3)}
           </span>
         </div>
         <div className="py-0.5 flex flex-col items-center justify-center h-9">
